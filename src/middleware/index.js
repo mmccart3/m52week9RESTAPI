@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/user")
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 
 const saltRounds = 14;
 
@@ -49,4 +50,28 @@ async function comparePassword(req,res,next) {
 
 }
 
-module.exports = {hashPassword, comparePassword};
+async function tokenCheck(req,res,next) {
+    try {
+        const secretKey = process.env.JWTPASSWORD;
+        const token = req.header("Authorization").replace("Bearer ", "");
+        const decodedToken = jwt.verify(token,secretKey);
+        console.log(decodedToken);
+        const userEmail = decodedToken.email;
+        const findResponse = await User.findOne({
+            where: {
+                email: userEmail
+            }
+        })
+        if(!findResponse){
+            throw new Error("User no longer in the database")
+        } else {
+            req.body.email = userEmail
+            next();
+        }
+    } catch (error) {
+        res.status(500).json({errormessage: error.message})
+        console.log(error) 
+    }
+}
+
+module.exports = {hashPassword, comparePassword, tokenCheck};

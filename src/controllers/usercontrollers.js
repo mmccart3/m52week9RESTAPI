@@ -3,8 +3,18 @@ const jwt = require("jsonwebtoken");
 
 async function login(req,res) {
     try {
+        const expirationTime = 1000*60*60*24*7;
+        const privateKey = process.env.JWTPASSWORD;
+        const payload = {
+            email:req.body.email
+        };
+        const options = {
+            expiresIn: expirationTime
+        };
+        const token = await jwt.sign(payload,privateKey,options);
+        console.log(token);
         res.status(200).json({
-            message: "user logged in", user: req.body.email
+            message: "user logged in", user: req.body.email, token: token
         })
     } catch (error) {
         res.status(500).json({message: "Unable to login user", errorMessage:error.message});
