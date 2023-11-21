@@ -7,8 +7,7 @@ const User = require("./models/user")
 const userRouter = require("./routes/userroutes");
 
 function syncTables() {
-    console.log(User)
-    User.sync()
+    User.sync({ alter: true })
 }
 
 const port = process.env.PORT || 5002
